@@ -39,8 +39,7 @@ EOF function:           "&"
 
 
 ```C
- "_#:"[0x01] 
- "_#:%001"
+ "_#:"[0x01] == "_#:%001"
 ``` 
 
 - Minimal Frame: 
@@ -50,8 +49,6 @@ EOF function:           "&"
 "adbs_#:&" 
 ``` 
  
-> one byte, or after '%' three bytes string. (1-255) 
-
 <BR>
 
 Server answer:  
@@ -63,16 +60,6 @@ SEQ_OK
 ---
 
 #### ADBSC Command list: 
-
-
-```
-[PSWD]          - Password (string) 
-[NAME]          - DB Name (string) 
-[DATA]          - Data... 
-[KEY]           - [R](UINT 4B) + [C](UINT 4B) + [STR](CHAR 32B) 
-[ID]            - [ID](UINT 8B) 
-[Ram_Key_Size]  - Ram Key Size (UINT 8B) 
-```
 
 
 
@@ -94,14 +81,27 @@ SEQ_OK
  | 0x0E | GETRKS ;                  | RAM_KEY SIZE: [ Ram_Key_Size ] |
 
 
-<BR><BR> 
+```
+[PSWD]          - Password (string) 
+[NAME]          - DB Name (string) 
+[DATA]          - Data... 
+[KEY]           - [R](UINT 4B) + [C](UINT 4B) + [STR](CHAR 32B) 
+[ID]            - [ID](UINT 8B) 
+[Ram_Key_Size]  - Ram Key Size (UINT 8B) 
+```
+
+
+#### Sample command: 
+```
+pswd password initdb tstdb addr 1 2 VAL_1 data!@#$%^& writedb ;
+```
 
 #### Sample frame: 
  PSWD + INITDB + ADDR + WRITEDB 
 
 
 ```
-adbs_#:%002password[0x00]_#:%005tstdb[0x00]_#:[0x06][0x00000001][0x00000002]KeyStringId[0x00][data!@#$%^&*...]_#:%007_#:& 
+adbs_#:%002password[0x00]_#:%005tstdb[0x00]_#:[0x06][0x00000001][0x00000002]VAL_1[0x00][data!@#$%^&]_#:%007_#:& 
 ```
 
 <BR> <BR> 
@@ -464,5 +464,31 @@ Sending first Package in size of one datagram.
 
 
  --- 
+
+
+<BR> <BR> 
+
+#### APiD for ADBS. 
+
+Init (UDP) <BR>
+Sending open message to port 54000.
+
+```
+"open " + MY_PORT[UINT, 4B] 
+```
+
+Sample answer from ADB Server: 
+
+```
+APiD Connection Created @ 192.168.1.201 : 55005
+```
+
+
+After this sequence regular APiD communication works from MY_PORT to 55005. 
+
+![APiD assembly](APiD_Init.png "APiD")
+
+
+
 
 
