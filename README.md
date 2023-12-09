@@ -1,10 +1,20 @@
 
+# auroslib help file 
 
-# AUROS Database
+###### 1. ADB 
+###### 2. NET 
+###### 3. ModbusTCP 
+###### 4. APiD 
+
+--- 
+--- 
+---
+
+# 1. AUROS Database
 
 ###### AUROS Database Server & AUROS Database Console
 
-- AUROS Database (ADB): Fast, Hybrid, Key-Value, NoSQL, C++ Library. 
+- AUROS Database (ADB): Fast, Hybrid, Key-Value, NoSQL
 
 - AUROS Database Server (ADBS): multithreding program using APiD (AUROS Package in Datagrams) Communication. 
 
@@ -79,6 +89,7 @@ SEQ_OK
  | 0x0C | EDITDRC [R] [C] [DATA] ;  | PSWD_REQ, INITDB_REQ, EDITDRC_OK. EDITDRC_ERROR |
  | 0x0D | EDITDSTR [STR] [DATA] ;   | PSWD_REQ, INITDB_REQ, EDITDSTR_OK. EDITDSTR_ERROR|
  | 0x0E | GETRKS ;                  | RAM_KEY SIZE: [ Ram_Key_Size ] |
+ | 0x0F | RANGE [ID] [RANGE];       | PSWD_REQ, INITDB_REQ, RANGE_OK. RANGE_ERROR |
 
 
 ```
@@ -88,10 +99,11 @@ SEQ_OK
 [KEY]           - [R](UINT 4B) + [C](UINT 4B) + [STR](CHAR 32B) 
 [ID]            - [ID](UINT 8B) 
 [Ram_Key_Size]  - Ram Key Size (UINT 8B) 
+[RANGE]         - Range
 ```
 
 
-#### Sample command: 
+#### Sample command(console - ADBSC): 
 ```
 pswd password initdb tstdb addr 1 2 VAL_1 data!@#$%^& writedb ;
 ```
@@ -104,11 +116,34 @@ pswd password initdb tstdb addr 1 2 VAL_1 data!@#$%^& writedb ;
 adbs_#:%002password[0x00]_#:%005tstdb[0x00]_#:[0x06][0x00000001][0x00000002]VAL_1[0x00][data!@#$%^&]_#:%007_#:& 
 ```
 
+
+#### ADB Functions list: 
+```C++
+[C++]
+unsigned int auros::LoadDataFromFileToDb( string file, string db, unsigned int type ) 
+// file = "list.csv", db = "datain"
+// type: 0 - bytes, 1 - real
+
+double auros::GetDoubleFromDbById( string dbb, unsigned long int id ) 
+double auros::GetDoubleFromDbByName( std::string dbb, std::string name) 
+
+bool auros::InitDB(const string &db)
+unsigned int auros::GetRamKeySize()
+bool auros::MkDbFile(const string &name)
+bool auros::WriteDB()
+bool auros::LoadNewRamKey(const ramkey &rmk)
+unsigne int auros::GetStatus(UDINT id)
+bool auros::Data( key &key, const RW_type &keytype, vector<BYTE> &data)
+// keytype: 0 = ID, 1 = R/C, 2 = String   //  0x10 -> bit 4 = WRITE
+
+```
+
+
 <BR> <BR> 
 
 ---
 
-# Network Library 
+# 2. Network Library 
 
 ###### C++ Wrapper Library for UDP and TCP .  
 
@@ -222,7 +257,7 @@ udpclient.Recv(msg);
 
 ---
 
-# Modbus TCP 
+# 3. Modbus TCP 
 
 ###### C++ Library for ModbusTCP.  
 
@@ -289,7 +324,7 @@ modbustcp wrapper is simple version of library for function = [0x03].
 
 ---
 
-# Package in Datagrams 
+# 4. Package in Datagrams 
 
 ![APiD Logo](APiD_logo.png "APiD")
 
@@ -372,6 +407,23 @@ apid constructor requires special config file
 0 
 ``` 
 
+
+```
+SEND --> DTG[1].1 
+no answer for 250ms 
+SEND --> DTG[1].2 
+no answer for 250ms 
+SEND --> DTG[1].3 
+    <-- If answer here - normal communication. 
+no answer for 250ms 
+SEND --> DTG[1].4 
+    <-- If answer here - normal communication. 
+no answer for 250ms 
+>>> ERROR 8 (bit 3)
+
+       Total time for Error 4x250ms = 1s 
+```
+
 <BR> <BR> 
 
 #### Errors.
@@ -393,13 +445,14 @@ unsigned int Error();
 - **bit 6** - 
 - **bit 7** - 
 
-Additionaly `cerr` stream may be redirected to a file from shell script. 
+Additionaly `cerr` and `stdout` streams may be redirected to a file from shell script. 
 
 ```bash
  
 #!/bin/sh 
 datax=$(date +'%m_%d_%Y_%H_%M_%S') 
 ./ADBS > log/ADBS_LOG_$datax 2>&1 
+#./ADBS 2> log/ADBS_LOG_$datax # only cerr 
 
 ```
 
@@ -408,7 +461,7 @@ datax=$(date +'%m_%d_%Y_%H_%M_%S')
 
 #### Header.
 
-![APiD assembly](frame.png "APiD")
+![APiD frame](frame.png "APiD")
 
  - PKG - Package 
  - DTG - Datagram 
@@ -486,9 +539,12 @@ APiD Connection Created @ 192.168.1.201 : 55005
 
 After this sequence regular APiD communication works from MY_PORT to 55005. 
 
-![APiD assembly](APiD_Init.png "APiD")
+![APiD for ADBS init](APiD_Init.png "APiD")
 
-
+```C++
+[C++]
+unsigned int auros::AdbsInit(std::string adbsip, UINT adbsport); 
+```
 
 
 
