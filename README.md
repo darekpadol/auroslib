@@ -5,6 +5,7 @@
 ###### 2. NET 
 ###### 3. ModbusTCP 
 ###### 4. APiD 
+###### 5. C++  
 
 --- 
 --- 
@@ -24,7 +25,7 @@
 
 ---
 
-#### Frame.
+#### ADBS Frame.
 
 
 ```C
@@ -69,7 +70,7 @@ SEQ_OK
 
 ---
 
-#### ADBSC Command list: 
+#### ADBS/C Command list: 
 
 
 
@@ -136,6 +137,57 @@ unsigne int auros::GetStatus(UDINT id)
 bool auros::Data( key &key, const RW_type &keytype, vector<BYTE> &data)
 // keytype: 0 = ID, 1 = R/C, 2 = String   //  0x10 -> bit 4 = WRITE
 
+// ADBS FRAME class
+// for ADBS Frame assembly 
+adbsframe()
+void Header()
+void EoF()
+std::vector<BYTE> GetFrame()
+void DbList()
+void Pswd(std::string pswd)
+void MkDB(std::string dbname)
+void RmDB(std::string dbname) 
+void InitDB(std::string dbname) 
+void AddR(UINT r, UINT c, std::string key, std::vector<BYTE> data) 
+void WriteDB() 
+void GetDID(unsigned long id) 
+void GetDRC(UINT r, UINT c) 
+void GetDStr(std::string str) 
+void EditDID(unsigned long id, std::vector<BYTE> data) 
+void EditDRC(UINT r, UINT c, std::vector<BYTE> data) 
+void EditDStr(std::string str, std::vector<BYTE> data) 
+void GetRKS() 
+void Range(unsigned long id, unsigned long rng) 
+
+// Example: 
+//
+// adbsframe FRAME; 
+// FRAME.Header(); 
+// FRAME.DbList(); 
+// FRAME.Pswd("password"); 
+// FRAME.MkDbFile("newdb");
+// FRAME.EoF(); 
+// 
+// FRAME.GetFrame() // redy to send via APiD  
+
+
+```
+
+```
+LoadDataFromFileToDb CSV file format: 
+----------------------
+| DATA | KEY | R | C | 
+|------|-----|---|---|
+
+Example:
+----------------------
+| 1234 | v1  | 0 | 0 |
+|------|-----|---|---|
+| 2213 | v2  | 0 | 1 |
+|------|-----|---|---|
+| 3215 | v3  | 0 | 2 |
+|------|-----|---|---|
+etc... 
 ```
 
 
@@ -160,11 +212,15 @@ included in **auroslib.hpp**<BR>
 Sample pseudo code: <BR>
 
 ```C
-ReadConfig("config");           // bool
+#include "auroslib.hpp"
+
 std::vector<BYTE> msg;
 
+using namespace auros; 
 
-#include "tcpserver.hpp"
+ReadConfig("config");           // bool, configfile required 
+// After ReadConfig can use VAR:: variables 
+// bool, no Errors = 0
 
 auros_tcp_serv tcpserwer(VAR::TCP_SERV_PORT, VAR::TCP_SERV_IP , VAR::TCP_SERV_BUFF);
 
@@ -285,7 +341,7 @@ int GetDataLenth();
 
 // -----------------------------------------------
 
-// modbustcp - wrapper
+// modbustcp wrapper class
 modbustcp(std::string ip, UINT port);
 std::vector<REAL> GetReal(UINT id, UINT addr, UINT count); 
 std::vector<UINT> GetInt(UINT id, UINT addr, UINT count); 
@@ -536,15 +592,171 @@ Sample answer from ADB Server:
 APiD Connection Created @ 192.168.1.201 : 55005
 ```
 
-
 After this sequence regular APiD communication works from MY_PORT to 55005. 
 
-![APiD for ADBS init](APiD_Init.png "APiD")
+![APiD for ADBS init](APiD_Init.png "APiD Init")
 
 ```C++
 [C++]
 unsigned int auros::AdbsInit(std::string adbsip, UINT adbsport); 
 ```
+
+Is imprtant to close connection after work. 
+Simply send "close" string to ADBS. 
+
+```
+"close " 
+```
+
+
+
+# 5. C++ 
+
+![cpp Logo](cpp.png "C++")
+
+###### Other standard auroslib functions. 
+
+```C++
+
+// Types 
+typedef long int                DINT 
+typedef unsigned long int       UDINT 
+typedef int                     INT
+typedef unsigned int            UINT 
+typedef unsigned char           BYTE 
+
+
+void auros::Msg(string id, string msg)                  // cout 
+void auros::Err(string id, string err)                  // cerr 
+
+
+// Timer 
+auros::T::T(unsigned int ST)
+bool auros::T::Run()
+void auros::T::Set(unsigned int ST)
+void auros::T::Reset()
+bool auros::T::Output()
+unsigned int auros::T::ET()
+
+// RE 
+auros::RE::RE()
+bool auros::RE::Run(bool in)
+
+// FE 
+auros::FE::FE()
+bool auros::FE::Run(bool in)
+
+// RFE 
+bool auros::RFE::Run( bool in )
+
+// RFE_SW 
+void auros::RFE_SW::Run(bool i_sw, bool &o_sw )
+
+// IMP_SW 
+auros::IMP_SW::IMP_SW(unsigned int tf )
+void auros::IMP_SW::Run( bool i_sw, bool &o_sw, unsigned int swon, unsigned int swoff )
+bool auros::IMP_SW::Active()
+void auros::IMP_SW::Reset()
+unsigned int auros::IMP_SW::Clicks()
+
+// Get actual time 
+string auros::ActTime()
+
+// float from BYTE vector [4B]
+float auros::Realer(  std::vector<BYTE> dat, UINT pos, bool revers )
+
+// INT from BYTE vector [4B]
+int auros::Inter( std::vector<BYTE> dat, UINT pos, bool revers )
+
+// double from BYTE vector [8B]
+double auros::Realerd(  std::vector<BYTE> dat, UINT pos, bool revers )
+
+// Get vector of bytes 
+std::vector<BYTE> ByteVector( T val, UINT size ) 
+
+// bit, byte, word operations 
+T SetBit(T &byte, unsigned int c)
+T ResetBit(T &byte, unsigned int c)
+bool GetBit(T byte, unsigned int c)
+unsigned char GetByte(T val, unsigned int c)
+T SetByte(T &val, unsigned char byte, unsigned int c)
+T SetWord(T &val, unsigned short int word, unsigned int c)
+T SetWord(T &val, unsigned short int word, unsigned int c)
+T GetWord(T val, unsigned int c)
+
+// example: 
+//      Dword           = 0x00000000 
+//      NewDWord        = 0x00000000 
+//
+//      NewDWord = SetByte( Dword, 0xCA, 3 )
+//      NewDWord        = 0xCA000000 
+//      Dword           = 0xCA000000 
+//       
+//      NewDWord = SetByte( Dword, 0xFE, 2 )
+//      NewDWord        = 0xCAFE0000 
+//      Dword           = 0xCAFE0000 
+//       
+//      NewDWord = SetByte( Dword, 0xBA, 1 )
+//      NewDWord        = 0xCAFEBA00 
+//      Dword           = 0xCAFEBA00 
+//       
+//      NewDWord = SetByte( Dword, 0xBE, 0 )
+//      NewDWord        = 0xCAFEBABE 
+//      Dword           = 0xCAFEBABE 
+//       
+
+// Read Data (double) from text file 
+// data separated with space or tab 
+readdata(string filename)
+double Get( int i ) 
+double Get() 
+bool EoF() 
+unsigned int GetDatasize() 
+void ResetPointer() 
+
+// example: 
+readdata SampleData("data.txt") 
+for( UINT i = 0; i < SampleData.GetDatasize(); i++)
+{
+        cout << SampleData.Get(i) << endl; 
+}
+
+// or 
+
+SampleData.ResetPointer(); 
+for( ; ; )
+{
+        cout << SampleData.Get() << endl;
+        if( SampleData.EoF() ){ break; }
+}
+
+
+// Pomiar nano seconds 
+auros::pomiar_ns POMIAR; 
+POMIAR.Start(); 
+// do your work... 
+POMIAR.Stop(); 
+POMIAR.Wyniki();  // cout....
+
+
+
+
+
+
+
+
+
+
+
+
+```
+
+
+
+
+
+
+
 
 
 
