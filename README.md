@@ -90,7 +90,7 @@ SEQ_OK
  | 0x0C | EDITDRC [R] [C] [DATA] ;  | PSWD_REQ, INITDB_REQ, EDITDRC_OK. EDITDRC_ERROR |
  | 0x0D | EDITDSTR [STR] [DATA] ;   | PSWD_REQ, INITDB_REQ, EDITDSTR_OK. EDITDSTR_ERROR|
  | 0x0E | GETRKS ;                  | RAM_KEY SIZE: [ Ram_Key_Size ] |
- | 0x0F | RANGE [ID] [RANGE];       | PSWD_REQ, INITDB_REQ, RANGE_OK. RANGE_ERROR |
+ | 0x0F | RANGE [ID] [RANGE] [OPT]; | PSWD_REQ, INITDB_REQ, RANGE_OK. RANGE_ERROR |
 
 
 ```
@@ -100,7 +100,13 @@ SEQ_OK
 [KEY]           - [R](UINT 4B) + [C](UINT 4B) + [STR](CHAR 32B) 
 [ID]            - [ID](UINT 8B) 
 [Ram_Key_Size]  - Ram Key Size (UINT 8B) 
-[RANGE]         - Range
+[RANGE]         - Range (if Range and ID = 0 return all records) 
+[OPT]           - Options (BYTE)
+                  if( OPT == 0 ) separator = ""
+                  if( OPT == 1 ) separator = " " 
+                  if( OPT == 2 ) separator = ", "
+                  if( OPT == 3 ) separator = "DATA:"
+                  if( OPT == 4 ) separator = "DATA[n]:"
 ```
 
 
@@ -458,10 +464,23 @@ apid constructor requires special config file
  
 #TimeOut
 250 
+
+#TimeOutIdle
+0
  
 #Debug
 0 
 ``` 
+
+> #### TimeOutIdle [cycles] 
+> 
+> If not set or set less than SendErrCount is NOT active. 
+> 
+> If You want to calculate value in miliseconds: [ms] = TimeOut x TimeOutIdle 
+
+> #### Debug [0-9]
+> 
+> If set to 0 no extra information.  
 
 
 ```
@@ -496,7 +515,7 @@ unsigned int Error();
 - **bit 1** - Wrong parameter counter - LoadConfig()
 - **bit 2** - Server Binding Error 
 - **bit 3** - SendErrLimit Reached. Stop()!
-- **bit 4** - 
+- **bit 4** - TimeOutIdle - No Comunication. Stop()! 
 - **bit 5** - 
 - **bit 6** - 
 - **bit 7** - 
@@ -750,6 +769,7 @@ POMIAR.Wyniki();  // cout....
 
 
 ```
+
 
 
 
