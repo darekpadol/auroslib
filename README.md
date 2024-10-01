@@ -779,4 +779,3 @@ POMIAR.Wyniki();  // cout....
 
 
 
-
