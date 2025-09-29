@@ -25,6 +25,10 @@
 
 ---
 
+#### File.adb 
+
+![File.adb](fileadb.png "File.adb")
+
 #### ADBS Frame.
 
 
@@ -769,11 +773,6 @@ POMIAR.Wyniki();  // cout....
 
 
 ```
-
-
-
-
-
 
 
 
