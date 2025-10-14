@@ -167,7 +167,7 @@ void EditDID(unsigned long id, std::vector<BYTE> data)
 void EditDRC(UINT r, UINT c, std::vector<BYTE> data) 
 void EditDStr(std::string str, std::vector<BYTE> data) 
 void GetRKS() 
-void Range(unsigned long id, unsigned long rng) 
+void Range(unsigned long id, unsigned long rng, BYTE opt) 
 
 // Example: 
 //
