@@ -353,8 +353,8 @@ int GetDataLenth();
 
 // modbustcp wrapper class
 modbustcp(std::string ip, UINT port);
-std::vector<REAL> GetReal(UINT id, UINT addr, UINT count); 
-std::vector<UINT> GetInt(UINT id, UINT addr, UINT count); 
+std::vector<REAL> GetReal32b(UINT id, UINT addr, UINT count); 
+std::vector<UINT> GetInt16b(UINT id, UINT addr, UINT count); 
 ```
 
 Sample pseudo code: <BR>
@@ -380,7 +380,7 @@ for( unsigned int i = 0; i < data.size(); i+=4)
 
 // modbustcp - wrapper
 modbustcp MdbTcp( IP, port);
-vector<float> val = MdbTcp.GetReal( 1, 1008, 2 );
+vector<float> val = MdbTcp.GetReal32b( 1, 1008, 2 );
 ```
 
 modbustcp wrapper is simple version of library for function = [0x03]. 
@@ -475,6 +475,14 @@ apid constructor requires special config file
 #Debug
 0 
 ``` 
+
+> #### TimeOut [ms] and SendErrCount
+> 
+> TIMEOUT = 3s  
+> SEND_PKG_INTERVAL = 1s  
+>
+> #TimeOut = SEND_PKG_INTERVAL * 0.5 = 500ms   
+> #SendErrCount = TIMEOUT * 2 / TimeOut = 12 (minimum)  
 
 > #### TimeOutIdle [cycles] 
 > 
@@ -621,7 +629,8 @@ After this sequence regular APiD communication works from MY_PORT to 55005.
 
 ```C++
 [C++]
-unsigned int auros::AdbsInit(std::string adbsip, UINT adbsport); 
+unsigned int auros::AdbsInit(std::string adbsip, UINT adbsport, UINT myport); 
+// if myport == 0 then AdbsInit load it from apidconfig 
 ```
 
 Is imprtant to close connection after work. 
@@ -761,9 +770,26 @@ POMIAR.Start();
 POMIAR.Stop(); 
 POMIAR.Wyniki();  // cout....
 
+// adbsplug
+adbsplug(string myip, string ip, UINT myport, UINT initport );
+void Login(string pswd); 
+void WriteDB(string dbname, string pswd); 
+void MkDb(string name, string pswd); 
+void RmDb(string name, string pswd); 
+void DbInit(string dbname, string pswd);
+void AddR(UINT R, UINT C, string key, vector<BYTE> data); 
+void AddR_log(UINT R, UINT C, string key, vector<BYTE> data); 
+string GetStr(vector<string> keys);
+UDINT GetRKS(); 
+bool EditDRC(UINT r, UINT c, vector<BYTE> data); 
+bool EditDStr( string key, string data, UINT size ); 
+bool EditDStrV( vector<string> key, vector<string> data, UINT size ); 
+string GetMyIP();
+std::vector<std::vector<BYTE>> GetDATA_Range(unsigned long id, unsigned long range); 
 
 
-
+// #UDP_CLI_PORT: 54000 for adbs init 
+auros::adbsplug ADBS("192.168.1.100", "192.168.1.100", 55501, 54000);
 
 
 
@@ -773,8 +799,4 @@ POMIAR.Wyniki();  // cout....
 
 
 ```
-
-
-
-
 
